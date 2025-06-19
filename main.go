@@ -7,6 +7,7 @@ import (
 	"github.com/fbsobreira/gotron-sdk/pkg/client"
 	"github.com/fbsobreira/gotron-sdk/pkg/store"
 	"github.com/yourname/tron-demo/block"
+	"github.com/yourname/tron-demo/monitor"
 	"google.golang.org/grpc"
 	"log"
 	"math/big"
@@ -54,15 +55,15 @@ func main() {
 		return
 	}
 	fmt.Println("当前区块高度：", num)
-	//
-	//// 从当前最新高度开始监听
-	//startBlock := num // 例如你查询过的某个起始区块高度
-	//err = monitor.MonitorBlockEvents(gRPCWalletClient, startBlock)
-	//if err != nil {
-	//	fmt.Println("监听失败:", err)
-	//}
 
-	block.GetBlockByNum(gRPCWalletClient, int64(73216128))
+	// 从当前最新高度开始监听
+	startBlock := num // 例如你查询过的某个起始区块高度
+	err = monitor.MonitorBlockEvents(gRPCWalletClient, startBlock)
+	if err != nil {
+		fmt.Println("监听失败:", err)
+	}
+
+	//block.GetBlockByNum(gRPCWalletClient, int64(73216128))
 
 }
 
