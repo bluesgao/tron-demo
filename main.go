@@ -2,41 +2,71 @@ package main
 
 import (
 	"fmt"
+	"github.com/fbsobreira/gotron-sdk/pkg/account"
 	"github.com/fbsobreira/gotron-sdk/pkg/address"
 	"github.com/fbsobreira/gotron-sdk/pkg/client"
+	"github.com/fbsobreira/gotron-sdk/pkg/store"
+	"github.com/yourname/tron-demo/block"
 	"google.golang.org/grpc"
 	"log"
 	"math/big"
 )
 
 func main() {
+	// 主网地址
 	tornEndpoint := "grpc.trongrid.io:50051"
-	//credential := "your-credential"
-	//caPath := "your-ca.crt-file-path"
-	//creds, err := credentials.NewClientTLSFromFile(caPath, "")
-	//if err != nil {
-	//	fmt.Printf("failed to load credentials: %v\n", err)
-	//}
 	gRPCWalletClient := client.NewGrpcClient(tornEndpoint)
-	//gRPCWalletClient.SetAPIKey(credential)
-	gRPCWalletClient.Start(grpc.WithInsecure())
-
-	getAccountInfo(gRPCWalletClient, "TRvzGHTsfgbVkrFjCovFtyLU4HBd3u6Fdw")
-
-	// 你的 TRON 地址（Base58 格式）
-
-	tokenContract := "TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj" // TRC20 USDT
-
-	userAddress := "TRvzGHTsfgbVkrFjCovFtyLU4HBd3u6Fdw"
-
-	balance, err := getTRC20Balance(gRPCWalletClient, tokenContract, userAddress)
+	err := gRPCWalletClient.Start(grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("获取USDT余额失败: %v", err)
+		log.Fatalf("failed to start grpc client: %v", err)
+		return
 	}
 
-	fmt.Printf("USDT余额: %s (单位：6位精度)\n", balance.String())
+	//err = getAccountInfo(gRPCWalletClient, "TRvzGHTsfgbVkrFjCovFtyLU4HBd3u6Fdw")
+	//if err != nil {
+	//	log.Fatalf("获取账户信息失败: %v", err)
+	//	return
+	//}
+	//
+	////设置合约地址（USDT合约在主网的地址）
+	//contractAddr := "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t" // TRC20 USDT
+	//// 设置用户地址
+	//userAddress := "TRvzGHTsfgbVkrFjCovFtyLU4HBd3u6Fdw"
+	//
+	//balance, err := getTRC20Balance(gRPCWalletClient, userAddress, contractAddr)
+	//if err != nil {
+	//	log.Fatalf("获取USDT余额失败: %v", err)
+	//}
+	//
+	//fmt.Printf("USDT余额: %s (单位：6位精度)\n", balance)
+
+	// TBk1CRZnfBqpY7Wr9DbfdJfpdVf3nGgk16
+	// behind sound trust make tray steak game jeans regret three coil dog hole cinnamon flat cart antique valley canyon laundry dinosaur real fuel potato
+	//createAccount()
+	//err = getAccountInfo(gRPCWalletClient, "TBk1CRZnfBqpY7Wr9DbfdJfpdVf3nGgk16")
+	//if err != nil {
+	//	log.Fatalf("获取账户信息失败: %v", err)
+	//	return
+	//}
+
+	num, err := block.GetCurrentBlockNum(gRPCWalletClient)
+	if err != nil {
+		return
+	}
+	fmt.Println("当前区块高度：", num)
+	//
+	//// 从当前最新高度开始监听
+	//startBlock := num // 例如你查询过的某个起始区块高度
+	//err = monitor.MonitorBlockEvents(gRPCWalletClient, startBlock)
+	//if err != nil {
+	//	fmt.Println("监听失败:", err)
+	//}
+
+	block.GetBlockByNum(gRPCWalletClient, int64(73216128))
+
 }
 
+// 获取当前区块
 func getNowBlock(c *client.GrpcClient) {
 	resp, err := c.GetNowBlock()
 	if err != nil {
@@ -81,8 +111,8 @@ func getAccountInfo(c *client.GrpcClient, addr string) error {
 }
 
 // 获取usdt余额
-func getTRC20Balance(c *client.GrpcClient, tokenContract, account string) (*big.Int, error) {
-	contractAddr, err := address.Base58ToAddress(tokenContract)
+func getTRC20Balance(c *client.GrpcClient, account, contract string) (*big.Int, error) {
+	contractAddr, err := address.Base58ToAddress(contract)
 	if err != nil {
 		return nil, fmt.Errorf("合约地址无效: %w", err)
 	}
@@ -92,30 +122,35 @@ func getTRC20Balance(c *client.GrpcClient, tokenContract, account string) (*big.
 		return nil, fmt.Errorf("账户地址无效: %w", err)
 	}
 
-	// balanceOf(address) 方法签名
-	methodID := "70a08231"
-	//addrHex := accountAddr.Hex()[2:] // 去掉 "41" 前缀
-	//addrBytes, err := hex.DecodeString(addrHex)
-	//if err != nil {
-	//	return nil, fmt.Errorf("地址 hex 解码失败: %w", err)
-	//}
-
-	//data := append(common.Hex2Bytes(methodID), common.LeftPadBytes(addrBytes, 32)...)
-
-	// 关键调用（TriggerConstantContract）
-	result, err := c.TriggerConstantContract(accountAddr.String(), contractAddr.String(), methodID, "")
+	result, err := c.TRC20ContractBalance(accountAddr.String(), contractAddr.String())
+	log.Printf("result:%s, err:%s", result, err)
 	if err != nil {
-		return nil, fmt.Errorf("TriggerConstantContract 调用失败: %w", err)
+		return nil, err
 	}
 
-	if !result.GetResult().GetResult() {
-		return nil, fmt.Errorf("TRC20 合约调用失败: %s", result.GetResult().GetMessage())
-	}
-
-	if len(result.GetConstantResult()) == 0 {
-		return nil, fmt.Errorf("合约未返回数据")
-	}
-
-	balance := new(big.Int).SetBytes(result.GetConstantResult()[0])
+	balance := new(big.Int).SetBytes(result.Bytes())
 	return balance, nil
+}
+
+// 创建账户
+func createAccount() {
+	// 创建本地账户（助记词 + keystore 存储）
+	acc := &account.Creation{
+		Name:       "myAccount",
+		Passphrase: "StrongPassword123!",
+	}
+
+	if err := account.CreateNewLocalAccount(acc); err != nil {
+		log.Fatalf("创建账户失败: %v", err)
+	}
+
+	// 获取地址
+	addr, err := store.AddressFromAccountName(acc.Name)
+	if err != nil {
+		log.Fatalf("获取地址失败: %v", err)
+	}
+
+	fmt.Println("✅ 创建成功！")
+	fmt.Printf("地址 Base58: %s\n", addr)
+	fmt.Printf("助记词: %s\n", acc.Mnemonic)
 }
