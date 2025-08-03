@@ -2,26 +2,25 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"math/big"
+
 	"github.com/fbsobreira/gotron-sdk/pkg/account"
 	"github.com/fbsobreira/gotron-sdk/pkg/address"
 	"github.com/fbsobreira/gotron-sdk/pkg/client"
 	"github.com/fbsobreira/gotron-sdk/pkg/store"
-	"github.com/yourname/tron-demo/block"
-	"github.com/yourname/tron-demo/monitor"
-	"google.golang.org/grpc"
-	"log"
-	"math/big"
+	"github.com/yourname/tron-demo/trongrid"
 )
 
 func main() {
 	// 主网地址
-	tornEndpoint := "grpc.trongrid.io:50051"
-	gRPCWalletClient := client.NewGrpcClient(tornEndpoint)
-	err := gRPCWalletClient.Start(grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("failed to start grpc client: %v", err)
-		return
-	}
+	// tornEndpoint := "grpc.trongrid.io:50051"
+	// gRPCWalletClient := client.NewGrpcClient(tornEndpoint)
+	// err := gRPCWalletClient.Start(grpc.WithInsecure())
+	// if err != nil {
+	// 	log.Fatalf("failed to start grpc client: %v", err)
+	// 	return
+	// }
 
 	//err = getAccountInfo(gRPCWalletClient, "TRvzGHTsfgbVkrFjCovFtyLU4HBd3u6Fdw")
 	//if err != nil {
@@ -50,17 +49,34 @@ func main() {
 	//	return
 	//}
 
-	num, err := block.GetCurrentBlockNum(gRPCWalletClient)
-	if err != nil {
-		return
-	}
-	fmt.Println("当前区块高度：", num)
+	// num, err := block.GetCurrentBlockNum(gRPCWalletClient)
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Println("当前区块高度：", num)
 
 	// 从当前最新高度开始监听
-	startBlock := num // 例如你查询过的某个起始区块高度
-	err = monitor.MonitorBlockEvents(gRPCWalletClient, startBlock)
+	// startBlock := num // 例如你查询过的某个起始区块高度
+	// err = monitor.MonitorBlockEvents(gRPCWalletClient, startBlock)
+	// if err != nil {
+	// 	fmt.Println("监听失败:", err)
+	// }
+
+	// 使用自定义配置
+	fmt.Println("\n=== 使用自定义配置获取转账交易 ===")
+	config := &trongrid.Config{
+		BaseURL:  "https://api.trongrid.io/v1/accounts/%s/transactions",
+		Address:  "TUk2k7gSZGs9xquWH6XMGa8BWWvq2m6hbd",
+		PageSize: 100,
+		// APIKey: "your-api-key-here", // 如果需要API密钥，请取消注释并填入
+	}
+
+	transfers, err := trongrid.GetTRC20Transactions(config)
 	if err != nil {
-		fmt.Println("监听失败:", err)
+		fmt.Printf("获取TRC20交易失败: %v\n", err)
+	} else {
+		fmt.Printf("找到 %d 笔转账交易\n", len(transfers))
+		trongrid.PrintTransfers(transfers)
 	}
 
 	//block.GetBlockByNum(gRPCWalletClient, int64(73216128))
