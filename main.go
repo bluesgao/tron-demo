@@ -66,7 +66,7 @@ func main() {
 	fmt.Println("\n=== 使用自定义配置获取转账交易 ===")
 	config := &trongrid.Config{
 		BaseURL:  "https://api.trongrid.io/v1/accounts/%s/transactions",
-		Address:  "TUk2k7gSZGs9xquWH6XMGa8BWWvq2m6hbd",
+		Address:  "TZAw4M78JonPirHnA1r5dfx5L954nay3DQ",
 		PageSize: 100,
 		// APIKey: "your-api-key-here", // 如果需要API密钥，请取消注释并填入
 	}
@@ -78,6 +78,10 @@ func main() {
 		fmt.Printf("找到 %d 笔转账交易\n", len(transfers))
 		trongrid.PrintTransfers(transfers)
 	}
+
+	// 汇总 转入，转出
+	sumIn, sumOut := trongrid.SumInOut(transfers)
+	fmt.Printf("转入: %d, 转出: %d\n", sumIn, sumOut)
 
 	//block.GetBlockByNum(gRPCWalletClient, int64(73216128))
 

@@ -557,3 +557,17 @@ func getTransferType(contractAddress string) string {
 		return "TRC20代币转账"
 	}
 }
+
+func SumInOut(transfers []TRC20Transfer) (int64, int64) {
+	sumIn := int64(0)
+	sumOut := int64(0)
+	for _, transfer := range transfers {
+		if transfer.FromAddress == "TZAw4M78JonPirHnA1r5dfx5L954nay3DQ" {
+			sumIn += transfer.Amount.Int64()
+		}
+		if transfer.ToAddress == "TZAw4M78JonPirHnA1r5dfx5L954nay3DQ" {
+			sumOut += transfer.Amount.Int64()
+		}
+	}
+	return sumIn, sumOut
+}
