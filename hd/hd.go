@@ -4,11 +4,12 @@ import (
 	"crypto/ecdsa"
 	"fmt"
 
+	"log"
+
 	"github.com/btcsuite/btcd/btcutil/base58"
 	"github.com/ethereum/go-ethereum/crypto"
 	hdwallet "github.com/miguelmota/go-ethereum-hdwallet"
 	"github.com/tyler-smith/go-bip39"
-	"log"
 )
 
 func generateMnemonic() string {
@@ -54,9 +55,9 @@ func main() {
 	}
 
 	// ETH 地址
-	ethPath := hdwallet.MustParseDerivationPath("m/44'/60'/0'/0/0")
-	ethAcc, _ := wallet.Derive(ethPath, false)
-	fmt.Println("ETH地址:", ethAcc.Address.Hex())
+	//ethPath := hdwallet.MustParseDerivationPath("m/44'/60'/0'/0/0")
+	//ethAcc, _ := wallet.Derive(ethPath, false)
+	//fmt.Println("ETH地址:", ethAcc.Address.Hex())
 
 	// TRON 派生
 	tronPath := hdwallet.MustParseDerivationPath("m/44'/195'/0'/0/0")
