@@ -31,8 +31,8 @@ func (w *EventWatcher) FetchTransferEvents(ctx context.Context, fingerprint stri
 
 	req := w.restyClient.R().
 		SetContext(ctx).
-		SetQueryParam("event_name", EventNameTransfer). // Filter by event name (Transfer for TRC-20 transfers)
-		SetQueryParam("limit", fmt.Sprintf("%d", limit)). // Max 200 per page
+		SetQueryParam("event_name", EventNameTransfer).                   // Filter by event name (Transfer for TRC-20 transfers)
+		SetQueryParam("limit", fmt.Sprintf("%d", limit)).                 // Max 200 per page
 		SetQueryParam("only_confirmed", fmt.Sprintf("%t", onlyConfirmed)) // Only confirmed events
 
 	// Pagination: use fingerprint from previous response to get next page
